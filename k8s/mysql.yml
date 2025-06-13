@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-db
+  template:
+    metadata:
+      labels:
+        app: user-db
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.3.0
+          env:
+            - name: MYSQL_DATABASE
+              value: user_db
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          args:
+            - "--default-authentication-plugin=mysql_native_password"
+          ports:
+            - containerPort: 3306        # Service port
+
+          volumeMounts:
+            - name: user-db-data
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: user-db-data
+          persistentVolumeClaim:
+            claimName: user-db-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+spec:
+  ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: user-db
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: department-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: department-db
+  template:
+    metadata:
+      labels:
+        app: department-db
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.3.0
+          env:
+            - name: MYSQL_DATABASE
+              value: department_db
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          args:
+            - "--default-authentication-plugin=mysql_native_password"
+          ports:
+            - containerPort: 3306        # Service port
+
+          volumeMounts:
+            - name: dept-db-data
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: dept-db-data
+          persistentVolumeClaim:
+            claimName: dept-db-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: department-db
+spec:
+  ports:
+    - name: mysql
+      port: 3306        # Service port
+      targetPort: 3306  # Pod container port
+      protocol: TCP
+  selector:
+    app: department-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dept-db-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
