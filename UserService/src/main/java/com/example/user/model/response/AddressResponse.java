@@ -1,8 +1,8 @@
-package com.example.user.model.request;
+package com.example.user.model.response;
 
 import com.example.user.model.enums.AddressType;
 
-public record AddressRequest(
+public record AddressResponse(
 		int id,
 		AddressType type,
 		String street,

@@ -1,7 +1,7 @@
 package com.example.user.client;
 
 
-import com.example.user.model.request.DepartmentRequest;
+import com.example.user.model.response.DepartmentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ public interface DepartmentClient {
     Logger log = LoggerFactory.getLogger(DepartmentClient.class);
 
     @GetExchange("api/department/{departmentId}")
-    ResponseEntity<DepartmentRequest> getDepartmentById(@PathVariable Long departmentId);
+    ResponseEntity<DepartmentResponse> getDepartmentById(@PathVariable Long departmentId);
 
 
 }

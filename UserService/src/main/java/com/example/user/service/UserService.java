@@ -6,10 +6,10 @@ import com.example.user.exceptions.DepartmentNotFoundException;
 import com.example.user.exceptions.UserNotFoundException;
 import com.example.user.model.entities.User;
 import com.example.user.model.mapper.UserMapper;
-import com.example.user.model.request.DepartmentRequest;
 import com.example.user.model.request.UserRequest;
+import com.example.user.model.response.DepartmentResponse;
 import com.example.user.model.response.UserResponse;
-import com.example.user.repo.UserRepository;
+import com.example.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +27,17 @@ public class UserService {
     private UserMapper userMapper;
     private final DepartmentClient departmentClient;
 
-    public UserRequest saveUser(User user) {
+    public UserResponse registerUser(UserRequest userRequest) {
         try {
-            //TODO verify if dept is valid
-            User savedUser = userRepository.save(user);
-            return userMapper.toUserRequest(savedUser);
+            DepartmentResponse departmentResponse = getDepartmentFromClient(userRequest.departmentId());
+            if (departmentResponse != null) {
+                log.info("Department found with id: {}", userRequest.departmentId());
+                User userToSave = userMapper.userRequestToUser(userRequest);
+                User savedUser = userRepository.save(userToSave);
+                return userMapper.toUserResponseWithDepartment(savedUser, departmentResponse);
+            } else {
+                throw new DepartmentNotFoundException("Department not found with id: " + userRequest.departmentId());
+            }
         } catch (Exception e) {
             log.error("Error saving user: {}", e.getMessage(), e);
             throw new BadRequestException("Failed to save user: " + e.getMessage());
@@ -39,42 +45,36 @@ public class UserService {
     }
 
     public UserResponse getUser(Long userId) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-        UserRequest userRequest = userMapper.toUserRequest(user);
-        ResponseEntity<DepartmentRequest> responseEntity = departmentClient.getDepartmentById(Long.valueOf(user.getDepartmentId()));
+        DepartmentResponse departmentResponse = getDepartmentFromClient(user.getDepartmentId());
+        return userMapper.toUserResponseWithDepartment(user, departmentResponse);
+    }
+
+    private DepartmentResponse getDepartmentFromClient(Long  deptId) {
+
+        ResponseEntity<DepartmentResponse> responseEntity = departmentClient.getDepartmentById(deptId);
         log.info("Response status {} ", responseEntity.getStatusCode());
         if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-            DepartmentRequest departmentRequest = responseEntity.getBody();
-            return new UserResponse(departmentRequest, userRequest);
-
+            return responseEntity.getBody();
         } else {
-            // Handle error case
-            throw new DepartmentNotFoundException("Failed to fetch department");
+            throw new DepartmentNotFoundException("Failed to fetch department with id: " + deptId);
         }
-
     }
 
     public List<UserResponse> getUsers() {
         List<User> users = userRepository.findAll();
-
         List<UserResponse> userResponses = new ArrayList<>();
 
         for (User user : users) {
-
-           /* ResponseEntity<DepartmentRequest> responseEntity = restTemplate
-                    .getForEntity("http://api-gateway:8080/api/department/" + user.getDepartmentId(),
-                            DepartmentRequest.class);*/
-            ResponseEntity<DepartmentRequest> responseEntity = departmentClient.getDepartmentById(Long.valueOf(user.getDepartmentId()));
+            ResponseEntity<DepartmentResponse> responseEntity = departmentClient.getDepartmentById(user.getDepartmentId());
             log.info("Response status {} ", responseEntity.getStatusCode());
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                DepartmentRequest departmentRequest = responseEntity.getBody();
-                UserRequest userRequest = userMapper.toUserRequest(user);
-                UserResponse userResponse = new UserResponse(departmentRequest, userRequest);
+                DepartmentResponse departmentResponse = responseEntity.getBody();
+                log.info("Department found with id: {}", user.getDepartmentId());
+                UserResponse userResponse = new UserResponse(departmentResponse, user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
                 userResponses.add(userResponse);
             } else {
-                // Handle error case
                 throw new DepartmentNotFoundException("Failed to fetch department");
             }
         }
