@@ -12,12 +12,12 @@ public class RoutesConfig {
 	    public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
 	        return builder.routes()
 	                .route(r -> r.path("/api/users/**")
-	                        .uri("http://user-service:9002/"))
+	                        .uri("lb://user-service"))
 	                .route(r -> r.path("/api/department/**")
 	                        .uri("http://department-service:9001/"))
-	                /*.route(r -> r.path("/api/products/**")
-	                        .uri("http://localhost:8083/"))
-	                */.build();
+	                .route(r -> r.path("/api/auth/**")
+	                        .uri("http://auth-service:9003/"))
+	                .build();
 	    }
 
 

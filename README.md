@@ -1,6 +1,6 @@
 # Microservices Architecture with Spring Cloud and Kubernetes
 
-This project demonstrates a microservices architecture using Spring Cloud, Eureka Service Discovery, and Kubernetes. It includes multiple microservices that communicate with each other to provide a complete application.
+This project demonstrates a microservices architecture using Spring Cloud, Eureka Service Discovery, and Kubernetes. It includes multiple microservices that communicate with each other to provide a complete application with JWT-based authentication.
 
 ## Architecture Overview
 
@@ -20,7 +20,15 @@ This project demonstrates a microservices architecture using Spring Cloud, Eurek
 │                 │     │                     │     │                  │
 │  Eureka Server  │◄───►│  Department Service │◄────┤  MySQL (Dept DB)  │
 │  (Port 8761)    │     │  (Port 9001)       │     │                  │
-│                 │     │                     │     └──────────────────┘
+│                 │     └─────────────────────┘     └──────────────────┘
+         │
+         │
+         ▼
+┌─────────────────┐     ┌─────────────────────┐
+│                 │     │                     │
+│  Auth Service   │◄───►│  User Service       │
+│  (Port 9003)    │     │  (For validation)   │
+│                 │     │                     │
 └─────────────────┘     └─────────────────────┘
 ```
 
@@ -42,15 +50,28 @@ This project demonstrates a microservices architecture using Spring Cloud, Eurek
    - Port: 8080
    - Routes requests to appropriate microservices
 
-3. **User Service** - Manages user data
+3. **Authentication Service** - Handles user authentication and JWT token generation
+   - Port: 9003
+   - Endpoints:
+     - `POST /api/v1/auth/login` - Authenticate user and get JWT token
+       ```json
+       {
+         "username": "user@example.com",
+         "password": "password123"
+       }
+       ```
+     - Returns: `{ "token": "jwt.token.here" }`
+
+4. **User Service** - Manages user data
    - Port: 9002
    - Endpoints: 
      - `POST /users` - Create a new user
      - `GET /users` - Get all users
      - `GET /users/{id}` - Get user by ID
      - `GET /users/department/{departmentId}` - Get users by department
+     - `POST /auth/validate` - Validate user credentials (internal use by Auth Service)
 
-4. **Department Service** - Manages department data
+5. **Department Service** - Manages department data
    - Port: 9001
    - Endpoints:
      - `POST /departments` - Create a new department
@@ -74,6 +95,7 @@ docker build -t eurekaservice:local ./EurekaService
 docker build -t userservice:local ./UserService
 docker build -t deptservice:local ./DepartmentService
 docker build -t apigatewayservice:local ./APIGatewayService
+docker build -t authservice:local ./AuthenticationService
 ```
 
 ### 3. Deploy to Kubernetes
@@ -101,7 +123,47 @@ kubectl apply -f k8s/apigateway-service.yaml
    ```
    Then access APIs through: http://localhost:8080
 
+3. **Authentication Service**:
+   - Base URL: http://localhost:9003
+   - Login endpoint: `POST /api/v1/auth/login`
+   - Include JWT token in subsequent requests: `Authorization: Bearer <token>`
+
+## Authentication Flow
+
+1. **Login**
+   ```http
+   POST /api/v1/auth/login
+   Content-Type: application/json
+   
+   {
+     "username": "user@example.com",
+     "password": "password123"
+   }
+   ```
+   - On success, returns a JWT token
+   - Use this token in the `Authorization` header for protected endpoints
+
+2. **Protected Requests**
+   ```http
+   GET /api/protected-endpoint
+   Authorization: Bearer <your-jwt-token>
+   ```
+
 ## API Documentation
+
+### Authentication Service
+
+- **Login**
+  ```
+  POST /api/v1/auth/login
+  Content-Type: application/json
+  
+  {
+    "username": "user@example.com",
+    "password": "password123"
+  }
+  ```
+  - Returns: `{ "token": "jwt.token.here" }`
 
 ### User Service
 

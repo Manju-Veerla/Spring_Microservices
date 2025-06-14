@@ -22,11 +22,21 @@
         <module name="UserService" />
         <module name="DepartmentService" />
       </profile>
+      <profile name="Annotation profile for AuthenticationService" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="AuthenticationService" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="APIGatewayService" options="-parameters" />
+      <module name="AuthenticationService" options="-parameters" />
       <module name="DepartmentService" options="-parameters" />
       <module name="EurekaServer" options="-parameters" />
       <module name="UserService" options="-parameters" />

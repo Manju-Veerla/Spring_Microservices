@@ -98,6 +98,32 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9001/actuator/health"]
       interval: 30s
       timeout: 10s
+
+  auth-service:
+    build:
+      context: ./AuthenticationService
+      dockerfile: Dockerfile
+    image: authservice:local
+    container_name: auth-service
+    ports:
+      - "9003:9003"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      user-service:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=auth-service
+      - AUTH_APP_JWT_SECRET=5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+      - AUTH_APP_JWT_EXPIRATION_MS=3600000
+      - USER_SERVICE_URL=http://user-service:9002
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9003/actuator/health"]
+      interval: 30s
+      timeout: 10s
       retries: 3
       start_period: 40s
 

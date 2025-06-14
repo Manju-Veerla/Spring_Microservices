@@ -14,7 +14,9 @@ import com.example.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +29,18 @@ public class UserService {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private final DepartmentClient departmentClient;
+    private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public UserDeptResponse registerUser(UserRequest userRequest) {
         try {
             DepartmentResponse departmentResponse = getDepartmentFromClient(userRequest.departmentId());
             if (departmentResponse != null) {
                 log.info("Department found with id: {}", userRequest.departmentId());
                 User userToSave = userMapper.userRequestToUser(userRequest);
+                // Encode the password before saving
+                String encodedPassword = passwordEncoder.encode(userToSave.getPassword());
+                userToSave.setPassword(encodedPassword);
                 User savedUser = userRepository.save(userToSave);
                 return userMapper.toUserResponseWithDepartment(savedUser, departmentResponse);
             } else {
@@ -45,6 +52,7 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public UserDeptResponse getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
@@ -63,6 +71,7 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<UserDeptResponse> getUsers() {
         List<User> users = userRepository.findAll();
         List<UserDeptResponse> userResponses = new ArrayList<>();
@@ -82,6 +91,7 @@ public class UserService {
         return userResponses;
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponse> getUsersByDepartmentId(Long departmentId) {
         ResponseEntity<DepartmentResponse> responseEntity = departmentClient.getDepartmentById(departmentId);
         if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
@@ -95,9 +105,22 @@ public class UserService {
     }
     List<UserResponse> userResponses = new ArrayList<>();
         for (User user : users) {
-            UserResponse userResponse = new UserResponse(user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
-            userResponses.add(userResponse);
+            userResponses.add(userMapper.userToUserResponseWithoutPassword(user));
         }
         return userResponses;
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        return userMapper.userToUserResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validateCredentials(String username, String password) {
+        return userRepository.findByUsername(username)
+                .map(user -> passwordEncoder.matches(password, user.getPassword()))
+                .orElse(false);
     }
 }

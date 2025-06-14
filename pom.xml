@@ -23,6 +23,7 @@
         <module>APIGatewayService</module>
         <module>UserService</module>
         <module>DepartmentService</module>
+        <module>AuthenticationService</module>
     </modules>
     
     <properties>

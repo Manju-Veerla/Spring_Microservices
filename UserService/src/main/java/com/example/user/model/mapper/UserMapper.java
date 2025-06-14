@@ -4,14 +4,19 @@ import com.example.user.model.entities.User;
 import com.example.user.model.request.UserRequest;
 import com.example.user.model.response.DepartmentResponse;
 import com.example.user.model.response.UserDeptResponse;
+import com.example.user.model.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    UserRequest userToUserRequest(User user);
+    UserResponse userToUserResponse(User user);
+
+    UserResponse userToUserResponseWithoutPassword(User user);
     User userRequestToUser(UserRequest userRequest);
+
+
 
     @Mapping(target = "department", ignore = true) // We'll set this manually in the service
     @Mapping(source = "username", target = "username")
@@ -30,5 +35,6 @@ public interface UserMapper {
             response.email()
         );
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.example.user.controller;
 
+import com.example.user.model.request.LoginRequest;
 import com.example.user.model.request.UserRequest;
 import com.example.user.model.response.UserDeptResponse;
 import com.example.user.model.response.UserResponse;
@@ -40,5 +41,16 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getUsersByDepartmentId(@PathVariable("departmentId") Long departmentId){
         List<UserResponse> users = userService.getUsersByDepartmentId(departmentId);
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable("username") String username){
+        UserResponse userResponse = userService.getUserByUsername(username);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/validate")
+    public boolean validateCredentials(@RequestBody LoginRequest request) {
+        return userService.validateCredentials(request.username(), request.password());
     }
 }
