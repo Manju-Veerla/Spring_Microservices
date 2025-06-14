@@ -1,10 +1,10 @@
-package com.example.demo.model.mapper;
+package com.example.dept.model.mapper;
 
-import com.example.demo.model.request.AddressRequest;
-import com.example.demo.model.request.DepartmentRequest;
-import com.example.demo.model.entities.Address;
-import com.example.demo.model.entities.Department;
-import com.example.demo.model.response.DepartmentResponse;
+import com.example.dept.model.request.AddressRequest;
+import com.example.dept.model.request.DepartmentRequest;
+import com.example.dept.model.entities.Address;
+import com.example.dept.model.entities.Department;
+import com.example.dept.model.response.DepartmentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

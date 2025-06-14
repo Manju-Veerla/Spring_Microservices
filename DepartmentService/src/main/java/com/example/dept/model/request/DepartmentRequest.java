@@ -1,4 +1,4 @@
-package com.example.demo.model.request;
+package com.example.dept.model.request;
 
 import java.util.Set;
 

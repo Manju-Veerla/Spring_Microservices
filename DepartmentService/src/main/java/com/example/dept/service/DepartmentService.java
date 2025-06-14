@@ -1,12 +1,12 @@
-package com.example.demo.service;
+package com.example.dept.service;
 
-import com.example.demo.model.request.DepartmentRequest;
-import com.example.demo.model.mapper.DepartmentMapper;
-import com.example.demo.model.response.DepartmentResponse;
+import com.example.dept.model.request.DepartmentRequest;
+import com.example.dept.model.mapper.DepartmentMapper;
+import com.example.dept.model.response.DepartmentResponse;
 import org.springframework.stereotype.Component;
 
-import com.example.demo.model.entities.Department;
-import com.example.demo.repo.DepartmentRepository;
+import com.example.dept.model.entities.Department;
+import com.example.dept.repo.DepartmentRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

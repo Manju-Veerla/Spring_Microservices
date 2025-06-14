@@ -1,8 +1,8 @@
-package com.example.demo.controller;
+package com.example.dept.controller;
 
-import com.example.demo.model.request.DepartmentRequest;
-import com.example.demo.model.response.DepartmentResponse;
-import com.example.demo.service.DepartmentService;
+import com.example.dept.model.request.DepartmentRequest;
+import com.example.dept.model.response.DepartmentResponse;
+import com.example.dept.service.DepartmentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

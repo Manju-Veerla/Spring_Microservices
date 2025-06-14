@@ -1,6 +1,6 @@
-package com.example.demo.model.request;
+package com.example.dept.model.request;
 
-import com.example.demo.model.entities.AddressType;
+import com.example.dept.model.entities.AddressType;
 
 public record AddressRequest(
 		int id,

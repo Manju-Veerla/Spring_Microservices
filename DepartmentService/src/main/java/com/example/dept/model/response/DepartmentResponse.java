@@ -1,4 +1,4 @@
-package com.example.demo.model.response;
+package com.example.dept.model.response;
 
 import java.util.Set;
 
