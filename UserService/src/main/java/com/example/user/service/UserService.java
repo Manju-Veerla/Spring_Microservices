@@ -8,6 +8,7 @@ import com.example.user.model.entities.User;
 import com.example.user.model.mapper.UserMapper;
 import com.example.user.model.request.UserRequest;
 import com.example.user.model.response.DepartmentResponse;
+import com.example.user.model.response.UserDeptResponse;
 import com.example.user.model.response.UserResponse;
 import com.example.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class UserService {
     private UserMapper userMapper;
     private final DepartmentClient departmentClient;
 
-    public UserResponse registerUser(UserRequest userRequest) {
+    public UserDeptResponse registerUser(UserRequest userRequest) {
         try {
             DepartmentResponse departmentResponse = getDepartmentFromClient(userRequest.departmentId());
             if (departmentResponse != null) {
@@ -44,7 +45,7 @@ public class UserService {
         }
     }
 
-    public UserResponse getUser(Long userId) {
+    public UserDeptResponse getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         DepartmentResponse departmentResponse = getDepartmentFromClient(user.getDepartmentId());
@@ -62,9 +63,9 @@ public class UserService {
         }
     }
 
-    public List<UserResponse> getUsers() {
+    public List<UserDeptResponse> getUsers() {
         List<User> users = userRepository.findAll();
-        List<UserResponse> userResponses = new ArrayList<>();
+        List<UserDeptResponse> userResponses = new ArrayList<>();
 
         for (User user : users) {
             ResponseEntity<DepartmentResponse> responseEntity = departmentClient.getDepartmentById(user.getDepartmentId());
@@ -72,11 +73,30 @@ public class UserService {
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 DepartmentResponse departmentResponse = responseEntity.getBody();
                 log.info("Department found with id: {}", user.getDepartmentId());
-                UserResponse userResponse = new UserResponse(departmentResponse, user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
+                UserDeptResponse userResponse = new UserDeptResponse(departmentResponse, user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
                 userResponses.add(userResponse);
             } else {
                 throw new DepartmentNotFoundException("Failed to fetch department");
             }
+        }
+        return userResponses;
+    }
+
+    public List<UserResponse> getUsersByDepartmentId(Long departmentId) {
+        ResponseEntity<DepartmentResponse> responseEntity = departmentClient.getDepartmentById(departmentId);
+        if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
+            log.info("Department found with id: {}", departmentId);
+        } else {
+            throw new DepartmentNotFoundException("Failed to fetch department with id: " + departmentId);
+        }
+    List<User> users = userRepository.findByDepartmentId(departmentId);
+    if (users.isEmpty()) {
+        throw new UserNotFoundException("No users found for department with id: " + departmentId);
+    }
+    List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : users) {
+            UserResponse userResponse = new UserResponse(user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
+            userResponses.add(userResponse);
         }
         return userResponses;
     }

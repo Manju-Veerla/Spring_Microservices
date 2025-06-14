@@ -4,6 +4,7 @@ import com.example.demo.model.request.AddressRequest;
 import com.example.demo.model.request.DepartmentRequest;
 import com.example.demo.model.entities.Address;
 import com.example.demo.model.entities.Department;
+import com.example.demo.model.response.DepartmentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -15,13 +16,13 @@ public interface DepartmentMapper {
     @Mapping(source = "departmentName", target = "departmentName")
     @Mapping(source = "departmentCode", target = "departmentCode")
     @Mapping(target = "address", source = "address")
-    DepartmentRequest departmentToDepartmentDto(Department department);
+    DepartmentResponse departmentToDepartmentResponse(Department department);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "departmentName", target = "departmentName")
     @Mapping(source = "departmentCode", target = "departmentCode")
     @Mapping(target = "address", source = "address")
-    Department departmentDtoToDepartment(DepartmentRequest departmentDto);
+    Department departmentRequestToDepartment(DepartmentRequest departmentRequest);
 
     Set<AddressRequest> addressSetToAddressDTOSet(Set<Address> addresses);
 

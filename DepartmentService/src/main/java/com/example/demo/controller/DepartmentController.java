@@ -1,11 +1,14 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.request.DepartmentRequest;
+import com.example.demo.model.response.DepartmentResponse;
 import com.example.demo.service.DepartmentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -18,13 +21,17 @@ public class DepartmentController {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> getDepartment(@PathVariable("id") long departmentId) {
-        DepartmentRequest department = departmentService.getDepartmentById(departmentId);
+        DepartmentResponse department = departmentService.getDepartmentById(departmentId);
         return ResponseEntity.ok(department);
     }
-
+    @GetMapping(value = "/all", produces = "application/json")
+    public ResponseEntity<List<DepartmentResponse>> getAllDepartment() {
+       List<DepartmentResponse>  departments = departmentService.getDepartments();
+        return ResponseEntity.ok(departments);
+    }
     @PostMapping(value = "/saveDept", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<DepartmentRequest> saveDepartment(@RequestBody DepartmentRequest department) {
-        DepartmentRequest savedDepartment = departmentService.saveDepartment(department);
+    public ResponseEntity<DepartmentResponse> saveDepartment(@RequestBody DepartmentRequest department) {
+        DepartmentResponse savedDepartment = departmentService.saveDepartment(department);
         return new ResponseEntity<>(savedDepartment, HttpStatus.CREATED);
     }
 
