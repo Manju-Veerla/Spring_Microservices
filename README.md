@@ -80,11 +80,11 @@ docker build -t apigatewayservice:local ./APIGatewayService
 
 ```bash
 # Apply Kubernetes configurations
-kubectl apply -f k8s/mysql.yml
-kubectl apply -f k8s/eureka-service.yml
-kubectl apply -f k8s/department-service.yml
-kubectl apply -f k8s/user-service.yml
-kubectl apply -f k8s/apigateway-service.yml
+kubectl apply -f k8s/mysql.yaml
+kubectl apply -f k8s/eureka-service.yaml
+kubectl apply -f k8s/department-service.yaml
+kubectl apply -f k8s/user-service.yaml
+kubectl apply -f k8s/apigateway-service.yaml
 ```
 
 ### 4. Access the Application
