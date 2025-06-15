@@ -1,6 +1,6 @@
 spring:
   application:
-    name: User-service
+    name: user-service
   datasource:
     url: jdbc:mysql://user-db:3306/user_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -9,27 +9,42 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-      dialect: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate.format_sql: true
+
 server:
   port: 9002
 
 eureka:
   client:
-   serviceUrl:
-    defaultZone: http://eureka-server:8761/eureka/
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-    doc-expansion: none
-  show-actuator: true
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  health:
+    db:
+      enabled: true
+    diskSpace:
+      enabled: true
+  metrics:
+    enable:
+      all: true
 
 department:
   service:
     url: http://department-service:9001
-

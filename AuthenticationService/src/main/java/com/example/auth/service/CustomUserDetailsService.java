@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            // First, validate the user exists
+            log.info("Loading user by username: {}", username);
             UserResponse user = userServiceClient.getUserByUsername(username);
             
             // For security, we'll use the validateCredentials endpoint to verify the password
@@ -51,6 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public boolean validateCredentials(String username, String password) {
         try {
             // Call the user service to validate credentials
+            log.info("Validating credentials for user: {}", username);
             return userServiceClient.validateCredentials(
                 new LoginRequest(username, password)
             );

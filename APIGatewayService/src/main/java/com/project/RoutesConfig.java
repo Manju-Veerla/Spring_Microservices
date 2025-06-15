@@ -14,9 +14,9 @@ public class RoutesConfig {
 	                .route(r -> r.path("/api/users/**")
 	                        .uri("lb://user-service"))
 	                .route(r -> r.path("/api/department/**")
-	                        .uri("http://department-service:9001/"))
+	                        .uri("lb://department-service"))
 	                .route(r -> r.path("/api/auth/**")
-	                        .uri("http://auth-service:9003/"))
+	                        .uri("lb://auth-service"))
 	                .build();
 	    }
 

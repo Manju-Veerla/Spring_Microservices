@@ -8,8 +8,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
-
+          enabled: false
 
 server:
   port: 8080
@@ -24,3 +23,10 @@ eureka:
     hostname: localhost
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.netty: DEBUG
