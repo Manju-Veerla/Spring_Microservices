@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: userservice:local
+          image: userservice:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9002
           env:

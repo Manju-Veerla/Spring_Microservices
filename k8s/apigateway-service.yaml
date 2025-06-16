@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: apigatewayservice:local
+          image: apigatewayservice:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:

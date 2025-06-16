@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: department-service
-          image: deptservice:local
+          image: deptservice:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9001
           env:

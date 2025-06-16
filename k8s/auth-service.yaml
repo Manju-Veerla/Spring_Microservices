@@ -14,9 +14,10 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: authservice:local
+          image: authservice:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 9002
+            - containerPort: 9003
           env:
             - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
               value: http://eureka-server:8761/eureka/
