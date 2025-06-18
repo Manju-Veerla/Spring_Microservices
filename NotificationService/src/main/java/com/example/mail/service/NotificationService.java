@@ -23,7 +23,7 @@ public class NotificationService {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom("notification@email.com");
             messageHelper.setTo(userRegisteredEvent.email());
-            messageHelper.setSubject(String.format("You with username %s is registered successfully", userRegisteredEvent.username()));
+            messageHelper.setSubject(String.format("You registered with username %s successfully", userRegisteredEvent.username()));
             messageHelper.setText(String.format("""
                             Hi %s,%s
 
