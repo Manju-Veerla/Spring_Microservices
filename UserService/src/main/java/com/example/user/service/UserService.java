@@ -5,6 +5,7 @@ import com.example.user.exceptions.BadRequestException;
 import com.example.user.exceptions.DepartmentNotFoundException;
 import com.example.user.exceptions.UserNotFoundException;
 import com.example.user.model.entities.User;
+import com.example.user.model.enums.Role;
 import com.example.user.model.mapper.UserMapper;
 import com.example.user.model.request.UserRequest;
 import com.example.user.model.response.DepartmentResponse;
@@ -30,6 +31,9 @@ public class UserService {
     private UserMapper userMapper;
     private final DepartmentClient departmentClient;
     private final PasswordEncoder passwordEncoder;
+    private final ProducerService producerService;
+
+
 
     @Transactional
     public UserDeptResponse registerUser(UserRequest userRequest) {
@@ -41,8 +45,11 @@ public class UserService {
                 // Encode the password before saving
                 String encodedPassword = passwordEncoder.encode(userToSave.getPassword());
                 userToSave.setPassword(encodedPassword);
+                userToSave.setRole(Role.USER);
                 User savedUser = userRepository.save(userToSave);
-                return userMapper.toUserResponseWithDepartment(savedUser, departmentResponse);
+                UserDeptResponse userDeptResponse = userMapper.toUserResponseWithDepartment(savedUser, departmentResponse);
+                producerService.sendRegistrationEmail(userDeptResponse);
+                return userDeptResponse;
             } else {
                 throw new DepartmentNotFoundException("Department not found with id: " + userRequest.departmentId());
             }

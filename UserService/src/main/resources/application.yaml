@@ -13,7 +13,11 @@ spring:
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
       hibernate.format_sql: true
-
+  kafka:
+    bootstrap-servers: message-broker:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 server:
   port: 9002
 

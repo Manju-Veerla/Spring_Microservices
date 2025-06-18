@@ -10,3 +10,5 @@ WORKDIR /EurekaService
 COPY --from=build /EurekaService/target/*.jar EurekaService.jar
 ENTRYPOINT ["java", "-jar", "EurekaService.jar"]
 EXPOSE 8761
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8761/actuator/health || exit 1

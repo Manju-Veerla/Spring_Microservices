@@ -31,6 +31,15 @@
         </processorPath>
         <module name="AuthenticationService" />
       </profile>
+      <profile name="Annotation profile for NotificationService" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
+        </processorPath>
+        <module name="NotificationService" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -39,6 +48,7 @@
       <module name="AuthenticationService" options="-parameters" />
       <module name="DepartmentService" options="-parameters" />
       <module name="EurekaServer" options="-parameters" />
+      <module name="NotificationService" options="-parameters" />
       <module name="UserService" options="-parameters" />
     </option>
   </component>
