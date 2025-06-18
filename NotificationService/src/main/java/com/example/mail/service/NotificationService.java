@@ -1,9 +1,8 @@
 package com.example.mail.service;
 
-import com.example.mail.event.UserRegisteredEvent;
+import com.example.user.event.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -17,7 +16,7 @@ public class NotificationService {
 
     private final JavaMailSender javaMailSender;
 
-    @KafkaListener(topics = "user-registered")
+    
     public void sendRegistrationEmail(UserRegisteredEvent userRegisteredEvent){
         log.info("Got Message from user-registered topic {}", userRegisteredEvent);
         MimeMessagePreparator messagePreparator = mimeMessage -> {

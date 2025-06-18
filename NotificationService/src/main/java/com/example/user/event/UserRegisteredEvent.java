@@ -1,4 +1,4 @@
-package com.example.mail.event;
+package com.example.user.event;
 
 public record UserRegisteredEvent(
         String username,

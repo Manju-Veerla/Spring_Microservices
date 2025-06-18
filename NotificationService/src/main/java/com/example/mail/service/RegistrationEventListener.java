@@ -1,6 +1,6 @@
 package com.example.mail.service;
 
-import com.example.mail.event.UserRegisteredEvent;
+import com.example.user.event.UserRegisteredEvent;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class RegistrationEventListener {
     private NotificationService notificationService;
 
-    @KafkaListener(topics = "user-registered", groupId = "notification-service-group")
+    @KafkaListener(topics = "user-registered", groupId = "notification-group")
     public void listen(UserRegisteredEvent userRegisteredEvent) {
         notificationService.sendRegistrationEmail(userRegisteredEvent);
     }
