@@ -30,16 +30,16 @@ This project demonstrates a microservices architecture using Spring Cloud, Eurek
 │                 │     │                     │     │                  │
 │  Eureka Server  │◄───►│  Department Service │◄────┤  MySQL (Dept DB)  │
 │  (Port 8761)    │     │  (Port 9001)       │     │                  │
-│                 │     └─────────────────────┘     └──────────────────┘
-         │
-         │
-         ▼
-┌─────────────────┐     ┌─────────────────────┐
-│                 │     │                     │
-│  Auth Service   │◄───►│  User Service       │
-│  (Port 9003)    │     │  (For validation)   │
-│                 │     │                     │
-└─────────────────┘     └─────────────────────┘
+│                 │     └──────────┬──────────┘     └──────────────────┘
+         │                        │
+         │                        │
+         ▼                        ▼
+┌─────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
+│                 │     │                     │     │                     │
+│  Auth Service   │◄───►│  User Service       │     │  Notification      │
+│  (Port 9003)    │     │  (For validation)   │◄────┤  Service           │
+│                 │     │                     │     │  (Port 9004)       │
+└─────────────────┘     └─────────────────────┘     └─────────────────────┘
 ```
 
 ## Prerequisites
@@ -64,38 +64,22 @@ This project demonstrates a microservices architecture using Spring Cloud, Eurek
 
 3. **Authentication Service** - Handles user authentication and JWT token generation
    - Port: 9003
-   - Endpoints:
-     - `POST /api/v1/auth/login` - Authenticate user and get JWT token
-       ```json
-       {
-         "username": "user@example.com",
-         "password": "password123"
-       }
-       ```
-     - Returns: `{ "token": "jwt.token.here" }`
-
+   
 4. **User Service** - Manages user data
    - Port: 9002
-   - Endpoints: 
-     - `POST /users` - Create a new user
-     - `GET /users` - Get all users
-     - `GET /users/{id}` - Get user by ID
-     - `GET /users/department/{departmentId}` - Get users by department
-     - `POST /auth/validate` - Validate user credentials (internal use by Auth Service)
-
+   
 5. **Department Service** - Manages department data
    - Port: 9001
-   - Endpoints:
-     - `POST /departments` - Create a new department
-     - `GET /departments` - Get all departments
-     - `GET /departments/{id}` - Get department by ID
-
+   
+6. **Notification Service** - Handles sending notifications to users
+   - Port: 9004
+   
 ## Getting Started
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Manju-Veerla/Spring_Microservices.git
 cd Microservices
 ```
 
@@ -110,14 +94,36 @@ mvn clean install
 
 ```bash
 # Build and tag Docker images for each service
-docker build -t eurekaservice:local ./EurekaService
-docker build -t userservice:local ./UserService
-docker build -t deptservice:local ./DepartmentService
-docker build -t apigatewayservice:local ./APIGatewayService
-docker build -t authservice:local ./AuthenticationService
+docker build -t eurekaservice:latest ./EurekaService
+docker build -t userservice:latest ./UserService
+docker build -t deptservice:latest ./DepartmentService
+docker build -t apigatewayservice:latest ./APIGatewayService
+docker build -t authservice:latest ./AuthenticationService
+docker build -t notificationservice:latest ./NotificationService
 ```
 
-### 4. Deploy to Kubernetes
+
+### 5. Start Services
+
+#### Option 1: Using the Start Script (Recommended)
+
+The easiest way to start all services is using the provided `start-services.sh` script:
+
+```bash
+# Make the script executable if it's not already
+chmod +x start-services.sh
+
+# Run the script
+./start-services.sh
+```
+
+This script will:
+1. Set the Kubernetes context to Docker Desktop
+2. Start all required services in the correct order
+3. Wait for each service to be ready before proceeding
+4. Set up port forwarding for Eureka Dashboard (8761) and API Gateway (8080)
+
+(or you can run the script manually)
 
 ```bash
 # Apply Kubernetes configurations
@@ -127,9 +133,48 @@ kubectl apply -f k8s/department-service.yaml
 kubectl apply -f k8s/user-service.yaml
 kubectl apply -f k8s/apigateway-service.yaml
 kubectl apply -f k8s/auth-service.yaml
+kubectl apply -f k8s/notification-service.yaml
 ```
 
-### 5. Access the Application
+#### Option 2: Start All Services with Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+#### Option 3: Start Services Individually
+
+1. **Start Eureka Service Discovery**
+   ```bash
+   docker run -d -p 8761:8761 --name eureka-server eurekaservice:latest
+   ```
+
+2. **Start User Service**
+   ```bash
+   docker run -d -p 9002:9002 --name user-service --network=host -e SPRING_PROFILES_ACTIVE=prod userservice:latest
+   ```
+
+3. **Start Department Service**
+   ```bash
+   docker run -d -p 9001:9001 --name department-service --network=host -e SPRING_PROFILES_ACTIVE=prod deptservice:latest
+   ```
+
+4. **Start Authentication Service**
+   ```bash
+   docker run -d -p 9003:9003 --name auth-service --network=host -e SPRING_PROFILES_ACTIVE=prod authservice:latest
+   ```
+
+5. **Start Notification Service**
+   ```bash
+   docker run -d -p 9004:9004 --name notification-service --network=host -e SPRING_PROFILES_ACTIVE=prod notificationservice:latest
+   ```
+
+6. **Start API Gateway**
+   ```bash
+   docker run -d -p 8080:8080 --name api-gateway --network=host -e SPRING_PROFILES_ACTIVE=prod apigatewayservice:latest
+   ```
+
+### 6. Access the Application
 
 1. **Access Eureka Dashboard**:
    ```bash
@@ -149,6 +194,86 @@ kubectl apply -f k8s/auth-service.yaml
 - **Spring Boot Actuator**: Available at `/actuator` on each service
 - **Logs**: View logs using `kubectl logs <pod-name>`
 
-## License
+## Testing the Application
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Using Postman
+
+A Postman collection is provided in the `.postman` directory to help you test the API endpoints. Here's how to use it:
+
+1. **Import the Collection**
+   - Open Postman
+   - Click on "Import" and select the file: `.postman/Microservice.postman_collection.json`
+
+2. **Available Endpoints**
+
+#### Authentication
+- **Login**
+  - `POST /api/auth/login`
+  - Request Body:
+    ```json
+    {
+      "username": "Test_3",
+      "password": "test_3"
+    }
+    ```
+  - Returns JWT token for authenticated requests
+
+#### Department Service
+- **Get Department by ID**
+  - `GET /api/department/{id}`
+  - Example: `GET /api/department/1`
+
+- **Get All Departments**
+  - `GET /api/department/all`
+
+- **Create Department**
+  - `POST /api/department/saveDept`
+  - Request Body:
+    ```json
+    {
+      "departmentName": "POSTAL",
+      "address": [
+        {
+          "type": "PERSONAL",
+          "street": "Caeclein strasse",
+          "city": "Berlin",
+          "pincode": "16517"
+        }
+      ],
+      "departmentCode": "POSTAL"
+    }
+    ```
+
+#### User Service
+- **Create User**
+  - `POST /api/users`
+  - Request Body:
+    ```json
+    {
+      "username": "Test_3",
+      "password": "test_3",
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "Mailing_J@gmail.com",
+      "departmentId": "1"
+    }
+    ```
+
+- **Get User by ID**
+  - `GET /api/users/{id}`
+  - Example: `GET /api/users/1`
+
+- **Get All Users**
+  - `GET /api/users/all`
+
+- **Get Users by Department**
+  - `GET /api/users/department/{departmentId}`
+  - Example: `GET /api/users/department/1`
+
+3. **Service URLs**
+   - **Eureka Dashboard**: http://localhost:8761
+   - **API Gateway**: http://localhost:8080
+   - **User Service**: http://localhost:9002
+   - **Department Service**: http://localhost:9001
+   - **Authentication Service**: http://localhost:9003
+   - **Notification Service**: http://localhost:9004
